@@ -6,7 +6,7 @@
 
 Import-Module ./pks/pks.psd1
 Connect-PKSApi -Credential (Get-Credential Jason) -Url https://api.gcp.59s.io
-$Cluster = New-PKSCluster -Name delete-me -ClusterUrl delete-me.gcp.59s.io -Plan small
+Measure-Command {$Cluster = New-PKSCluster -Name delete-me -ClusterUrl bs.gcp.59s.io -Plan small}
 
 ### In a small window
 
@@ -35,7 +35,7 @@ $images = docker images --format "{{json .}}" | ConvertFrom-Json
 $images.where{$_.Repository -match "harbor\.gcp\.59s\.io/library"}.foreach{"$($_.Repository):$($_.Tag)"}
 
 ##### Delete them!
-$images.where{$_.Repository -match "harbor\.gcp\.59s\.io/library"}.foreach{docker rmi $_.ID}
+$images.where{$_.Repository -match "harbor\.gcp\.59s\.io/59s"}.foreach{docker rmi $_.ID}
 
 ## Kubectl
 
@@ -124,4 +124,15 @@ Remove-PKSCluster -Name $Cluster.name
 
 Get-PKSClusterCredential -Name pwsh-m-cli
 kubectl get nodes
+
+## Dockerfiles
+
+docker build -t jasonmorgan/pks-module .
+
+docker run -it --rm jasonmorgan/pks-module
+Import-Module pks
+Connect-PKSApi -Credential (Get-Credential Jason) -Url https://api.gcp.59s.io
+Get-PKSCluster
+
+## Questions?
 
