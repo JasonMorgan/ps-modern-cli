@@ -24,7 +24,7 @@ $Cluster = New-PKSCluster -Name delete-me -ClusterUrl bs.gcp.59s.io -Plan small
 
 ### In a small window
 
-watch pks clusters
+watch ./watch.sh
 
 ### And we'll come back to this later
 
@@ -32,7 +32,7 @@ watch pks clusters
 
 ### Cleanup some images
 
-docker images list
+docker images
 
 docker images --help 
 docker images --help | grep format
@@ -45,6 +45,9 @@ $images = docker images --format "{{json .}}" | ConvertFrom-Json
 
 $images.Count
 $images | Get-Member
+
+##### Ask about get-member
+
 $images[0]
 
 #### Let's do some cleanup!
@@ -69,6 +72,7 @@ $nginx | Get-Member
 docker inspect $nginx.ID
 $detailed_nginx = docker inspect $nginx.ID | ConvertFrom-Json
 $detailed_nginx
+$detailed_nginx | Get-Member
 $detailed_nginx.state
 $detailed_nginx.NetworkSettings
 $detailed_nginx.NetworkSettings.Ports
@@ -132,6 +136,7 @@ $pods.where{$_.metadata.labels.app -match 'nginx'} | measure
 
 #### Kill some pods
 
+kubectl delete pod $pods[0].metadata.name
 $pods.where{$_.metadata.labels.app -match 'nginx'} | select -First 3 | foreach {kubectl delete pod $_.metadata.name}
 
 ##### It returned too quickly so lets try it again
@@ -144,12 +149,21 @@ $pods.where{$_.metadata.labels.app -match 'nginx'} | select -First 3 | foreach {
 
 ### Dig into nodes
 
+#### In a side window
 $nodes = (kubectl get nodes --output json | ConvertFrom-Json).Items
+gcloud compute instances delete $nodes[1].metadata.name
+
+#### Watcher
+
+watch kubectl get nodes
+
+#### back to nodes
+
+$nodes = (kubectl get nodes --output json | ConvertFrom-Json).Items
+
 $nodes[0] | fl *
 $nodes[0].metadata
 $nodes[0].metadata.name
-
-gcloud compute instances delete $nodes = (kubectl get nodes --output json | ConvertFrom-Json).Items
 
 ## Lets take a look at PKS and the command from the start
 
@@ -162,7 +176,9 @@ $Cluster
 
 ### Checkout the Module
 
-### Come back to this later
+* Making Functions
+* Packaging Binaries
+* [cmdletBinding()]
 
 ### Lets do some stuff
 
@@ -193,6 +209,9 @@ Get-PKSCluster
 ## #!
 
 ## Recap
+
+* Convertfrom-Json
+* ConvertFrom-Yaml
 
 ## Questions?
 
