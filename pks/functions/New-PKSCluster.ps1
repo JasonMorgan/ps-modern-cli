@@ -1,5 +1,3 @@
-. ../Get-PKSCluster.ps1
-
 function New-PKSCluster {
   <##>
   [CmdletBinding()]
