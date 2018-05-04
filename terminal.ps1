@@ -10,6 +10,10 @@
 * Docker/Kubernetes Experience?
 * Powershell on Linux/Mac?
 
+## Objectives
+
+* Feel more comfortable converting cli output to Powershell objects
+
 ## Before we begin!
 ### In a side terminal
 
@@ -39,6 +43,10 @@ docker images --format "{{json .}}"
 docker images --format "{{json .}}" | ConvertFrom-Json
 $images = docker images --format "{{json .}}" | ConvertFrom-Json
 
+$images.Count
+$images | Get-Member
+$images[0]
+
 #### Let's do some cleanup!
 
 ##### Take a look at what we got
@@ -46,6 +54,35 @@ $images.where{$_.Repository -match "harbor\.gcp\.59s\.io/library"}.foreach{"$($_
 
 ##### Delete them!
 $images.where{$_.Repository -match "harbor\.gcp\.59s\.io/library"}.foreach{docker rmi $_.ID --force}
+
+docker images
+
+### Inspect some containers
+
+docker ps
+
+docker run -d -p 8080:80 nginx
+curl http://localhost:8080
+$nginx = docker ps --format "{{json .}}" | ConvertFrom-Json
+$nginx
+$nginx | Get-Member
+docker inspect $nginx.ID
+$detailed_nginx = docker inspect $nginx.ID | ConvertFrom-Json
+$detailed_nginx
+$detailed_nginx.state
+$detailed_nginx.NetworkSettings
+$detailed_nginx.NetworkSettings.Ports
+docker ps --format "{{json .}}" | ConvertFrom-Json | foreach { docker kill $_.ID }
+
+### Cleanup some old containers
+
+docker ps
+docker ps -a
+$containers = docker ps -a --format "{{json .}}" | ConvertFrom-Json
+$containers
+$containers.Count
+docker rm $containers[1].ID
+$containers.foreach{docker rm $_.ID}
 
 ## Kubectl
 
@@ -105,6 +142,15 @@ $pods.where{$_.metadata.labels.app -match 'nginx'} | select -First 3 | foreach {
 
 ((kubectl get pods --output json | ConvertFrom-Json).Items).where{$_.metadata.labels.app -match 'nginx'} | select -First 3 | foreach {kubectl delete pod $_.metadata.name}
 
+### Dig into nodes
+
+$nodes = (kubectl get nodes --output json | ConvertFrom-Json).Items
+$nodes[0] | fl *
+$nodes[0].metadata
+$nodes[0].metadata.name
+
+gcloud compute instances delete $nodes = (kubectl get nodes --output json | ConvertFrom-Json).Items
+
 ## Lets take a look at PKS and the command from the start
 
 pks --help
@@ -145,6 +191,8 @@ Connect-PKSApi -Credential (Get-Credential Jason) -Url https://api.gcp.59s.io
 Get-PKSCluster
 
 ## #!
+
+## Recap
 
 ## Questions?
 
