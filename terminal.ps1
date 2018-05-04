@@ -1,12 +1,22 @@
 # Modern CLI Demo
 
+## Intro
+
+### Please interrupt early and often
+
+## Audience Survey
+
+* Powershell Experience?
+* Docker/Kubernetes Experience?
+* Powershell on Linux/Mac?
+
 ## Before we begin!
+### In a side terminal
 
-### Powershell on Mac
-
-Import-Module ./pks/pks.psd1
+cd /Users/jason/JasonMorgan/ps-modern-cli
+Import-Module /Users/jason/JasonMorgan/ps-modern-cli/pks/pks.psd1
 Connect-PKSApi -Credential (Get-Credential Jason) -Url https://api.gcp.59s.io
-Measure-Command {$Cluster = New-PKSCluster -Name delete-me -ClusterUrl bs.gcp.59s.io -Plan small}
+$Cluster = New-PKSCluster -Name delete-me -ClusterUrl bs.gcp.59s.io -Plan small
 
 ### In a small window
 
@@ -35,7 +45,7 @@ $images = docker images --format "{{json .}}" | ConvertFrom-Json
 $images.where{$_.Repository -match "harbor\.gcp\.59s\.io/library"}.foreach{"$($_.Repository):$($_.Tag)"}
 
 ##### Delete them!
-$images.where{$_.Repository -match "harbor\.gcp\.59s\.io/59s"}.foreach{docker rmi $_.ID}
+$images.where{$_.Repository -match "harbor\.gcp\.59s\.io/library"}.foreach{docker rmi $_.ID --force}
 
 ## Kubectl
 
@@ -118,7 +128,7 @@ Get-PKSCluster -Name $Cluster.name
 Import-Module ~/JasonMorgan/ps-modern-cli/pks/pks.psd1
 Get-PKSCluster -Name delete-me
 $cluster = Get-PKSCluster -Name delete-me
-Remove-PKSCluster -Name $Cluster.name
+Remove-PKSCluster -Name $Cluster.name -Verbose
 
 ### Now back to the show
 
@@ -133,6 +143,8 @@ docker run -it --rm jasonmorgan/pks-module
 Import-Module pks
 Connect-PKSApi -Credential (Get-Credential Jason) -Url https://api.gcp.59s.io
 Get-PKSCluster
+
+## #!
 
 ## Questions?
 
